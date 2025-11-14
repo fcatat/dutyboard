@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>2026 年中国企业值班安排表在线生成器</title>
+  <link rel="icon" type="image/x-icon" href="favourite.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "SF Pro SC", "PingFang SC", "Microsoft Yahei", sans-serif;
+      --accent: #3478f6;
+      --holiday: rgba(255, 107, 129, 0.18);
+      --weekend: rgba(116, 191, 255, 0.2);
+      --makeup: rgba(255, 185, 46, 0.22);
+      --rest-bg: rgba(56, 193, 114, 0.22);
+      --duty-bg: rgba(52, 120, 246, 0.2);
+      --oncall-bg: rgba(255, 143, 63, 0.24);
+    }
+
+    body {
+      margin: 0;
+      padding: 1.5rem 1.25rem 3rem;
+      background: #fafafa;
+      color: #222;
+    }
+
+    h1 {
+      margin: 0 0 1rem;
+      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+    }
+
+    p.lead {
+      margin: 0 0 2rem;
+      color: #555;
+    }
+
+    .panel {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 16px 28px -24px rgba(41, 49, 77, 0.38);
+      padding: 1.25rem 1.35rem 1.6rem;
+      max-width: 1024px;
+      margin: 0 auto 1.75rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem 1.2rem;
+      margin-bottom: 0.65rem;
+    }
+
+    form#control-form {
+      margin-bottom: 0.4rem;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-weight: 600;
+    }
+
+    select,
+    input[type="number"],
+    input[type="range"] {
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      padding: 0.65rem 0.75rem;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="range"] {
+      padding: 0;
+    }
+
+    select:focus,
+    input[type="number"]:focus,
+    input[type="range"]:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.2);
+    }
+
+    .range-display {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    button {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 0.75rem 1.8rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      align-self: flex-end;
+      justify-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    button[data-variant="ghost"] {
+      background: rgba(52, 120, 246, 0.1);
+      color: #1f4aa8;
+    }
+
+    button[data-variant="danger"] {
+      background: #e94f4f;
+      color: #fff;
+    }
+
+    button[data-variant="danger"]:hover {
+      box-shadow: 0 10px 20px -12px rgba(233, 79, 79, 0.7);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px -12px rgba(36, 98, 195, 0.8);
+    }
+
+    button span {
+      font-size: 1.15rem;
+    }
+
+    .legend {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      color: #444;
+      margin-top: 0.35rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .schedule-wrapper {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background: #fff;
+    }
+
+    .table-title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    #table-title-input {
+      flex: 1;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1f3366;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      outline: none;
+      background: rgba(52, 120, 246, 0.08);
+      min-height: 2.1rem;
+    }
+
+    #table-title-input:focus {
+      border-color: rgba(52, 120, 246, 0.4);
+      background: rgba(52, 120, 246, 0.12);
+      box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.18);
+    }
+
+    #table-title-input[data-placeholder]:empty::before {
+      content: attr(data-placeholder);
+      color: #8c8c8c;
+      font-weight: 400;
+    }
+
+    #table-title-display {
+      display: none;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      min-width: 680px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #f6f7fb;
+      z-index: 1;
+    }
+
+    th, td {
+      padding: 0.8rem 0.9rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      text-align: center;
+    }
+
+    tbody tr:nth-child(odd) td:first-child {
+      background: rgba(52, 120, 246, 0.08);
+    }
+
+    td {
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+    }
+
+    td[data-role="name"] {
+      cursor: default;
+      font-weight: 600;
+      color: #222;
+      background: rgba(52, 120, 246, 0.12);
+      position: sticky;
+      left: 0;
+      z-index: 1;
+    }
+
+    td[data-role="name"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      z-index: -1;
+    }
+
+    td.holiday {
+      background: var(--holiday);
+    }
+
+    td.weekend {
+      background: var(--weekend);
+    }
+
+    td.makeup-day {
+      background: var(--makeup);
+    }
+
+    td.status-rest {
+      background: var(--rest-bg) !important;
+      color: #207449;
+      font-weight: 600;
+    }
+
+    td.status-duty {
+      background: var(--duty-bg) !important;
+      color: #0c2e78;
+      font-weight: 600;
+    }
+
+    td.status-oncall {
+      background: var(--oncall-bg) !important;
+      color: #8c3a00;
+      font-weight: 600;
+    }
+
+    td:active {
+      transform: scale(0.97);
+    }
+
+    caption {
+      caption-side: bottom;
+      padding: 1rem;
+      color: #555;
+      text-align: right;
+      font-size: 0.9rem;
+    }
+
+    .muted {
+      color: #6c6c6c;
+      font-size: 0.9rem;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .action-row button {
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding-inline: 1rem;
+      }
+
+      .panel {
+        padding: 1.1rem 1.2rem 1.5rem;
+      }
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .schedule-wrapper {
+        margin-inline: -1rem;
+      }
+
+      .action-row button {
+        width: 100%;
+      }
+
+      .table-title-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      #table-title-display {
+        max-width: 100%;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>2026 员工假期值班排班表</h1>
+    <p class="lead">
+      根据国务院办公厅公布的
+      <a href="https://www.gov.cn/zhengce/zhengceku/202511/content_7047091.htm" target="_blank" rel="noopener noreferrer">
+        2026 年部分节假日安排
+      </a>，快速生成覆盖假期及前后延伸日期的值班表。
+      点击单元格可在“休”“班”“值”“空”之间循环。
+    </p>
+
+    <form id="control-form">
+      <div class="form-grid">
+        <label>
+          选择节假日
+          <select id="holiday-select" required></select>
+        </label>
+        <label>
+          员工数量（行数）
+          <input id="employee-count" type="number" min="1" max="60" value="3" />
+        </label>
+        <label>
+          假期前后延伸天数
+          <input id="extension-days" type="range" min="0" max="14" value="3" />
+          <span class="range-display">假期前后各延伸 <strong>3</strong> 天</span>
+        </label>
+      </div>
+      <button type="submit" data-variant="danger">
+        <span>🔄</span> 重新生成排班表
+      </button>
+    </form>
+
+    <div class="legend" aria-hidden="true">
+      <span><span class="swatch" style="background: var(--holiday)"></span> 官方放假日</span>
+      <span><span class="swatch" style="background: var(--weekend)"></span> 周末自动标记</span>
+      <span><span class="swatch" style="background: var(--makeup)"></span> 调休需上班</span>
+      <span><span class="swatch" style="background: var(--rest-bg)"></span> 状态：休</span>
+      <span><span class="swatch" style="background: var(--duty-bg)"></span> 状态：班</span>
+      <span><span class="swatch" style="background: var(--oncall-bg)"></span> 状态：值</span>
+    </div>
+
+  </div>
+
+  <div class="panel schedule-panel">
+    <div class="schedule-wrapper">
+      <div class="table-title-bar">
+        <span contenteditable="true" id="table-title-input" data-placeholder="可在此录入自定义标题">xxx公司假期值班安排</span>
+        <span id="table-title-display"></span>
+      </div>
+      <table id="schedule-table">
+        <thead></thead>
+        <tbody></tbody>
+        <caption id="schedule-meta"></caption>
+      </table>
+    </div>
+    <div class="action-row">
+      <button type="button" id="download-pdf" data-variant="ghost">
+        <span>📄</span> 下载 PDF
+      </button>
+      <button type="button" id="download-excel" data-variant="ghost">
+        <span>📊</span> 下载 Excel
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.min.js" crossorigin="anonymous"></script>
+  <script>
+    const HOLIDAYS_2026 = [
+      {
+        id: 'new-year',
+        name: '元旦',
+        start: '2026-01-01',
+        end: '2026-01-03',
+        makeUpWorkdays: ['2026-01-04'],
+        memo: '1月4日（周日）调休上班'
+      },
+      {
+        id: 'spring-festival',
+        name: '春节',
+        start: '2026-02-15',
+        end: '2026-02-23',
+        makeUpWorkdays: ['2026-02-14', '2026-02-28'],
+        memo: '2月14日、2月28日（周六）调休上班'
+      },
+      {
+        id: 'qingming',
+        name: '清明节',
+        start: '2026-04-04',
+        end: '2026-04-06',
+        makeUpWorkdays: [],
+        memo: '无调休上班安排'
+      },
+      {
+        id: 'labor-day',
+        name: '劳动节',
+        start: '2026-05-01',
+        end: '2026-05-05',
+        makeUpWorkdays: ['2026-05-09'],
+        memo: '5月9日（周六）调休上班'
+      },
+      {
+        id: 'dragon-boat',
+        name: '端午节',
+        start: '2026-06-19',
+        end: '2026-06-21',
+        makeUpWorkdays: [],
+        memo: '无调休上班安排'
+      },
+      {
+        id: 'mid-autumn',
+        name: '中秋节',
+        start: '2026-09-25',
+        end: '2026-09-27',
+        makeUpWorkdays: [],
+        memo: '无调休上班安排'
+      },
+      {
+        id: 'national-day',
+        name: '国庆节',
+        start: '2026-10-01',
+        end: '2026-10-07',
+        makeUpWorkdays: ['2026-09-20', '2026-10-10'],
+        memo: '9月20日（周日）、10月10日（周六）调休上班'
+      }
+    ];
+
+    const weekdayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const STATUS_SEQUENCE = ['', '休', '班', '值'];
+    const table = document.getElementById('schedule-table');
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    const caption = document.getElementById('schedule-meta');
+    const tableTitleInput = document.getElementById('table-title-input');
+    const tableTitleDisplay = document.getElementById('table-title-display');
+    const select = document.getElementById('holiday-select');
+    const employeeInput = document.getElementById('employee-count');
+    const extensionInput = document.getElementById('extension-days');
+    const rangeDisplay = document.querySelector('.range-display strong');
+    const form = document.getElementById('control-form');
+    const EXCEL_LIB_SRC = 'https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.min.js';
+
+    const DEFAULT_TABLE_TITLE = 'xxx公司假期值班安排';
+
+    const legendItems = [
+      { label: '官方放假日', styleKey: 'holiday' },
+      { label: '周末自动标记', styleKey: 'weekend' },
+      { label: '调休需上班', styleKey: 'makeup' },
+      { label: '状态：休', styleKey: '休' },
+      { label: '状态：班', styleKey: '班' },
+      { label: '状态：值', styleKey: '值' }
+    ];
+
+    const downloadPdfButton = document.getElementById('download-pdf');
+    const downloadExcelButton = document.getElementById('download-excel');
+
+    let currentHoliday = HOLIDAYS_2026[0];
+    let currentDates = [];
+    let currentExtensionDays = Number(extensionInput.value) || 0;
+    let currentColumnMeta = [];
+    let excelLibPromise = null;
+
+    function initOptions() {
+      const fragment = document.createDocumentFragment();
+      HOLIDAYS_2026.forEach((holiday, index) => {
+        const option = document.createElement('option');
+        option.value = holiday.id;
+        option.textContent = `${holiday.name}（${formatDateLabel(holiday.start)} 至 ${formatDateLabel(holiday.end)}）`;
+        if (index === 0) {
+          option.selected = true;
+        }
+        fragment.appendChild(option);
+      });
+      select.appendChild(fragment);
+      currentHoliday = HOLIDAYS_2026[0];
+    }
+
+    function formatDateLabel(dateString) {
+      const date = new Date(dateString);
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const weekday = weekdayNames[date.getDay()];
+      return `${month}-${day} ${weekday}`;
+    }
+
+    function addDays(date, offset) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + offset);
+      return result;
+    }
+
+    function enumerateDateRange(startDate, endDate) {
+      const dates = [];
+      let cursor = new Date(startDate);
+      while (cursor <= endDate) {
+        dates.push(new Date(cursor));
+        cursor = addDays(cursor, 1);
+      }
+      return dates;
+    }
+
+    function formatISO(date) {
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, '0'),
+        String(date.getDate()).padStart(2, '0')
+      ].join('-');
+    }
+
+    function getHolidayById(id) {
+      return HOLIDAYS_2026.find((holiday) => holiday.id === id);
+    }
+
+    function isWeekend(date) {
+      const day = date.getDay();
+      return day === 0 || day === 6;
+    }
+
+    function buildSchedule() {
+      const holiday = getHolidayById(select.value);
+      const employeeCount = Math.max(1, Math.min(Number(employeeInput.value) || 1, 120));
+      const extensionDays = Number(extensionInput.value) || 0;
+      tableTitleDisplay.textContent = `导出预览：${getScheduleTitle()}`;
+
+      const officialStart = new Date(holiday.start);
+      const officialEnd = new Date(holiday.end);
+      const rangeStart = addDays(officialStart, -extensionDays);
+      const rangeEnd = addDays(officialEnd, extensionDays);
+      const dates = enumerateDateRange(rangeStart, rangeEnd);
+      const officialSet = new Set(enumerateDateRange(officialStart, officialEnd).map(formatISO));
+      const makeupSet = new Set(holiday.makeUpWorkdays);
+
+      currentHoliday = holiday;
+      currentDates = dates;
+      currentExtensionDays = extensionDays;
+
+      thead.innerHTML = '';
+      tbody.innerHTML = '';
+
+      const headerRow = document.createElement('tr');
+      const nameHeader = document.createElement('th');
+      nameHeader.textContent = '员工';
+      headerRow.appendChild(nameHeader);
+
+      currentColumnMeta = [];
+      dates.forEach((date) => {
+        const th = document.createElement('th');
+        const topLine = `${date.getMonth() + 1}/${date.getDate()}`;
+        const bottomLine = weekdayNames[date.getDay()];
+        th.innerHTML = `${topLine}<br><span class="muted">${bottomLine}</span>`;
+        headerRow.appendChild(th);
+
+        const iso = formatISO(date);
+        let columnType = 'normal';
+        if (makeupSet.has(iso)) {
+          columnType = 'makeup';
+        } else if (officialSet.has(iso)) {
+          columnType = 'holiday';
+        } else if (isWeekend(date)) {
+          columnType = 'weekend';
+        }
+        currentColumnMeta.push({ iso, columnType });
+      });
+
+      thead.appendChild(headerRow);
+
+      const defaultNames = ['张三', '李四', '王五', '赵六', '陈七', '周八', '吴九', '郑十'];
+      for (let i = 0; i < employeeCount; i += 1) {
+        const row = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        nameCell.dataset.role = 'name';
+        nameCell.textContent = defaultNames[i] || `员工 ${i + 1}`;
+        nameCell.contentEditable = true;
+        nameCell.title = '可直接修改员工姓名';
+        row.appendChild(nameCell);
+
+        dates.forEach((date, columnIndex) => {
+          const cell = document.createElement('td');
+          const iso = formatISO(date);
+          const inOfficialHoliday = officialSet.has(iso);
+          const isWeekendRest = isWeekend(date) && !makeupSet.has(iso);
+
+          if (makeupSet.has(iso)) {
+            cell.classList.add('makeup-day');
+          } else if (inOfficialHoliday) {
+            cell.classList.add('holiday');
+          } else if (isWeekendRest) {
+            cell.classList.add('weekend');
+          }
+
+          cell.dataset.iso = iso;
+          cell.dataset.stateIndex = '0';
+          cell.addEventListener('click', () => toggleCellState(cell));
+          row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+      }
+
+      caption.textContent = [
+        `${holiday.name}：${holiday.start} 至 ${holiday.end}`,
+        `调休提示：${holiday.memo}`,
+        `假期前后各延伸 ${extensionDays} 天，共 ${dates.length} 天（含周末自动标记）`
+      ].join(' ｜ ');
+    }
+
+    function toggleCellState(cell) {
+      const nextIndex = (Number(cell.dataset.stateIndex) + 1) % STATUS_SEQUENCE.length;
+      cell.dataset.stateIndex = String(nextIndex);
+      const statusText = STATUS_SEQUENCE[nextIndex];
+      cell.textContent = statusText;
+      cell.classList.remove('status-rest', 'status-duty', 'status-oncall');
+      if (statusText === '休') {
+        cell.classList.add('status-rest');
+      } else if (statusText === '班') {
+        cell.classList.add('status-duty');
+      } else if (statusText === '值') {
+        cell.classList.add('status-oncall');
+      }
+    }
+
+    function sanitiseFileName(text) {
+      return text.replace(/[\\/:*?"<>|]+/g, '-');
+    }
+
+    function buildFileBaseName(extension) {
+      const base = `${currentHoliday.name}-${currentHoliday.start}-延伸${currentExtensionDays}天`;
+      return `${sanitiseFileName(base)}.${extension}`;
+    }
+
+    function getScheduleTitle() {
+      if (!tableTitleInput) {
+        return DEFAULT_TABLE_TITLE;
+      }
+      const value = tableTitleInput.innerText || tableTitleInput.textContent || '';
+      const trimmed = value.trim();
+      return trimmed || DEFAULT_TABLE_TITLE;
+    }
+
+    function rgbArrayToHex(rgbArray) {
+      return rgbArray.map((value) => value.toString(16).padStart(2, '0')).join('').toUpperCase();
+    }
+
+    function createTableMatrix() {
+      const matrix = [];
+      const headerRow = Array.from(thead.querySelectorAll('th')).map((cell) =>
+        cell.innerText.replace(/\s+/g, ' ').trim()
+      );
+      matrix.push(headerRow);
+
+      Array.from(tbody.rows).forEach((row) => {
+        const cells = Array.from(row.cells).map((cell) => cell.innerText.trim());
+        matrix.push(cells);
+      });
+      return matrix;
+    }
+
+    let cachedFontBase64 = null;
+
+    async function loadFontData() {
+      if (!cachedFontBase64) {
+        cachedFontBase64 = await fetch('fonts/noto_sans_sc_regular.base64')
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('无法加载字体文件');
+            }
+            return response.text();
+          })
+          .then((text) => text.trim());
+      }
+      return cachedFontBase64;
+    }
+
+    async function ensurePdfFont(doc) {
+      const base64Font = await loadFontData();
+      doc.addFileToVFS('NotoSansSC-Regular.ttf', base64Font);
+      doc.addFont('NotoSansSC-Regular.ttf', 'NotoSansSC', 'normal');
+      doc.setFont('NotoSansSC', 'normal');
+    }
+
+    const STATUS_STYLE_MAP = {
+      休: {
+        fillColor: [255, 205, 210],
+        textColor: [183, 28, 28],
+        display: '休假'
+      },
+      班: {
+        fillColor: [200, 230, 201],
+        textColor: [27, 94, 32],
+        display: '上班'
+      },
+      值: {
+        fillColor: [255, 224, 178],
+        textColor: [239, 108, 0],
+        display: '值班'
+      }
+    };
+
+    const COLUMN_TYPE_STYLE_MAP = {
+      holiday: {
+        fillColor: [255, 236, 240],
+        textColor: [150, 26, 26]
+      },
+      weekend: {
+        fillColor: [236, 243, 255],
+        textColor: [40, 71, 140]
+      },
+      makeup: {
+        fillColor: [255, 243, 222],
+        textColor: [139, 94, 0]
+      }
+    };
+
+    function formatStatusLabel(value) {
+      const preset = STATUS_STYLE_MAP[value];
+      return preset ? preset.display : value;
+    }
+
+    function ensureExcelLib() {
+      if (typeof window.XLSX !== 'undefined') {
+        return Promise.resolve();
+      }
+      if (!excelLibPromise) {
+        excelLibPromise = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = EXCEL_LIB_SRC;
+          script.async = true;
+          script.onload = () => {
+            if (typeof window.XLSX === 'undefined') {
+              reject(new Error('Excel 导出库加载失败'));
+            } else {
+              resolve();
+            }
+          };
+          script.onerror = () => reject(new Error('Excel 导出库加载失败'));
+          document.head.appendChild(script);
+        });
+      }
+      return excelLibPromise;
+    }
+
+    function isStatusValue(value) {
+      return Object.prototype.hasOwnProperty.call(STATUS_STYLE_MAP, value);
+    }
+
+    function buildLegendRowsForPdf() {
+      return legendItems.map(({ label, styleKey }) => {
+        const style =
+          STATUS_STYLE_MAP[styleKey] ||
+          COLUMN_TYPE_STYLE_MAP[styleKey] || {
+            fillColor: [245, 245, 245],
+            textColor: [60, 60, 60]
+          };
+        return [
+          {
+            content: '',
+            styles: {
+              fillColor: style.fillColor,
+              textColor: style.textColor || [45, 45, 45],
+              minCellHeight: 10
+            }
+          },
+          {
+            content: label,
+            styles: {
+              halign: 'left',
+              textColor: [45, 45, 45]
+            }
+          }
+        ];
+      });
+    }
+
+    async function exportPdf() {
+      const jspdfNamespace = window.jspdf;
+      const jsPDF = jspdfNamespace && jspdfNamespace.jsPDF;
+      if (typeof jsPDF !== 'function') {
+        window.alert('PDF 导出库尚未加载，请稍后再试。');
+        return;
+      }
+      if (!jsPDF.API || typeof jsPDF.API.autoTable !== 'function') {
+        window.alert('PDF 导出插件尚未加载完成，请稍后再试。');
+        return;
+      }
+      const orientation = currentDates.length > 12 ? 'landscape' : 'portrait';
+      const doc = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
+      await ensurePdfFont(doc);
+      doc.setFontSize(16);
+      doc.text('2026 员工假期值班排班表', 40, 48);
+      doc.setFontSize(11);
+      const captionLines = doc.splitTextToSize(
+        caption.textContent,
+        orientation === 'landscape' ? 760 : 510
+      );
+      doc.text(captionLines, 40, 66);
+      const captionHeight = (captionLines.length || 1) * 14;
+      const scheduleTitle = getScheduleTitle();
+      const titleY = 66 + captionHeight + 8;
+      doc.setFontSize(12);
+      doc.text(scheduleTitle, 40, titleY);
+      const tableStartY = titleY + 12;
+
+      const matrix = createTableMatrix();
+      const header = matrix[0];
+      const body = matrix.slice(1);
+      const legendRows = buildLegendRowsForPdf();
+      const pdfBody = [
+        [
+          {
+            content: scheduleTitle,
+            colSpan: header.length,
+            styles: {
+              halign: 'left',
+              fontStyle: 'bold',
+              fillColor: [232, 241, 255],
+              textColor: [45, 45, 45],
+              font: 'NotoSansSC',
+              cellPadding: { top: 6, right: 6, bottom: 6, left: 6 }
+            }
+          }
+        ],
+        ...body
+      ];
+
+      doc.autoTable({
+        head: [header],
+        body: pdfBody,
+        startY: tableStartY,
+        styles: {
+          halign: 'center',
+          fontSize: 9,
+          cellPadding: 4,
+          font: 'NotoSansSC',
+          lineWidth: 0.4,
+          lineColor: [227, 230, 235]
+        },
+        headStyles: {
+          fillColor: [52, 120, 246],
+          halign: 'center',
+          font: 'NotoSansSC',
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        bodyStyles: {
+          textColor: [45, 45, 45]
+        },
+        alternateRowStyles: { fillColor: [246, 248, 252] },
+        columnStyles: {
+          0: { halign: 'left', cellWidth: 80 }
+        },
+        didParseCell(data) {
+          if (data.section !== 'body') return;
+          if (data.column.index === 0) {
+            data.cell.styles.fillColor = [251, 233, 240];
+            data.cell.styles.fontStyle = 'bold';
+          } else {
+            const rawValue = typeof data.cell.raw === 'string' ? data.cell.raw.trim() : data.cell.raw;
+            const status = isStatusValue(rawValue) ? rawValue : '';
+            const stylePreset = STATUS_STYLE_MAP[status];
+            if (stylePreset) {
+              data.cell.styles.fillColor = stylePreset.fillColor;
+              data.cell.styles.textColor = stylePreset.textColor;
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.text = String(formatStatusLabel(rawValue) || '');
+            } else {
+              const columnMeta = currentColumnMeta[data.column.index - 1];
+              const columnStyle = columnMeta ? COLUMN_TYPE_STYLE_MAP[columnMeta.columnType] : null;
+              if (columnStyle) {
+                data.cell.styles.fillColor = columnStyle.fillColor;
+                if (columnStyle.textColor) {
+                  data.cell.styles.textColor = columnStyle.textColor;
+                }
+              }
+              data.cell.text = String(rawValue || '');
+            }
+          }
+        },
+        margin: { bottom: 70 }
+      });
+
+      const legendStartY = doc.lastAutoTable.finalY + 24;
+      doc.setFontSize(12);
+      doc.text('图例', 40, legendStartY);
+      doc.autoTable({
+        startY: legendStartY + 6,
+        head: undefined,
+        body: legendRows,
+        theme: 'plain',
+        styles: {
+          font: 'NotoSansSC',
+          fontSize: 10,
+          cellPadding: { top: 4, right: 8, bottom: 4, left: 8 },
+          lineColor: [230, 230, 230],
+          lineWidth: 0.1
+        },
+        columnStyles: {
+          0: { cellWidth: 18 }
+        }
+      });
+
+      doc.save(buildFileBaseName('pdf'));
+    }
+
+    function mergeStyles(base, extra) {
+      const result = JSON.parse(JSON.stringify(base));
+      Object.keys(extra).forEach((key) => {
+        if (typeof extra[key] === 'object' && extra[key] !== null && !Array.isArray(extra[key])) {
+          result[key] = mergeStyles(result[key] || {}, extra[key]);
+        } else {
+          result[key] = extra[key];
+        }
+      });
+      return result;
+    }
+
+    async function exportExcel() {
+      await ensureExcelLib().catch((error) => {
+        window.alert(error.message || 'Excel 导出库尚未加载，请稍后再试。');
+        throw error;
+      });
+
+      if (typeof window.XLSX === 'undefined' || typeof window.XLSX.utils === 'undefined') {
+        throw new Error('Excel 导出库尚未加载，请稍后再试。');
+      }
+      const matrix = createTableMatrix();
+      const scheduleTitle = getScheduleTitle();
+      const columnCount = matrix[0]?.length || 1;
+      const titleRow = Array.from({ length: columnCount }, (_, index) =>
+        index === 0 ? scheduleTitle : ''
+      );
+      const excelMatrix = [titleRow, ...matrix];
+
+      const XLSX = window.XLSX;
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet(excelMatrix);
+
+      const headerReferenceRow = matrix[0] || titleRow;
+      const columnWidths = headerReferenceRow.map((_, index) => (index === 0 ? { wch: 18 } : { wch: 12 }));
+      worksheet['!cols'] = columnWidths;
+      worksheet['!rows'] = excelMatrix.map(() => ({ hpt: 28 }));
+      worksheet['!freeze'] = { xSplit: 1, ySplit: 2 };
+
+      const border = { style: 'thin', color: { rgb: 'FFE3E6EB' } };
+      const baseStyle = {
+        font: { name: 'Microsoft YaHei', sz: 11, color: { rgb: 'FF2D2D2D' } },
+        alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+        border: { top: border, right: border, bottom: border, left: border }
+      };
+      const headerStyle = mergeStyles(baseStyle, {
+        fill: { patternType: 'solid', fgColor: { rgb: 'FFE63E73' } },
+        font: { color: { rgb: 'FFFFFFFF' }, bold: true, sz: 12 }
+      });
+      const firstColStyle = mergeStyles(baseStyle, {
+        alignment: { horizontal: 'left' },
+        fill: { patternType: 'solid', fgColor: { rgb: 'FFFBE9F0' } },
+        font: { bold: true }
+      });
+      const statusStyles = Object.fromEntries(
+        Object.entries(STATUS_STYLE_MAP).map(([key, value]) => [
+          key,
+          mergeStyles(baseStyle, {
+            fill: { patternType: 'solid', fgColor: { rgb: `FF${rgbArrayToHex(value.fillColor)}` } },
+            font: { color: { rgb: `FF${rgbArrayToHex(value.textColor)}` }, bold: true }
+          })
+        ])
+      );
+      const columnTypeStyles = Object.fromEntries(
+        Object.entries(COLUMN_TYPE_STYLE_MAP).map(([key, value]) => [
+          key,
+          mergeStyles(baseStyle, {
+            fill: { patternType: 'solid', fgColor: { rgb: `FF${rgbArrayToHex(value.fillColor)}` } },
+            font: value.textColor ? { color: { rgb: `FF${rgbArrayToHex(value.textColor)}` } } : {}
+          })
+        ])
+      );
+
+      const titleCellAddress = XLSX.utils.encode_cell({ r: 0, c: 0 });
+      if (worksheet[titleCellAddress]) {
+        worksheet[titleCellAddress].s = mergeStyles(baseStyle, {
+          alignment: { horizontal: 'left' },
+          font: { bold: true, sz: 13 },
+          fill: { patternType: 'solid', fgColor: { rgb: 'FFE8F1FF' } }
+        });
+      }
+      worksheet['!merges'] = worksheet['!merges'] || [];
+      worksheet['!merges'].push({
+        s: { r: 0, c: 0 },
+        e: { r: 0, c: columnCount - 1 }
+      });
+
+      for (let r = 0; r < matrix.length; r += 1) {
+        for (let c = 0; c < matrix[r].length; c += 1) {
+          const excelRowIndex = r + 1;
+          const cellAddress = XLSX.utils.encode_cell({ r: excelRowIndex, c });
+          const cell = worksheet[cellAddress];
+          if (!cell) continue;
+
+          let style = baseStyle;
+          if (r === 0) {
+            style = headerStyle;
+          } else if (c === 0) {
+            style = firstColStyle;
+          } else {
+            const status = matrix[r][c];
+            if (statusStyles[status]) {
+              style = statusStyles[status];
+              const label = String(formatStatusLabel(status) || '');
+              cell.v = label;
+              cell.w = label;
+            } else if (c > 0) {
+              const columnMeta = currentColumnMeta[c - 1];
+              const columnStyle = columnMeta ? columnTypeStyles[columnMeta.columnType] : null;
+              if (columnStyle) {
+                style = columnStyle;
+              }
+            }
+          }
+          cell.s = style;
+        }
+      }
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, currentHoliday.name.slice(0, 31));
+      const legendStartRow = excelMatrix.length + 2;
+      XLSX.utils.sheet_add_aoa(
+        worksheet,
+        [['图例', '说明']],
+        { origin: { r: legendStartRow - 1, c: 0 } }
+      );
+      XLSX.utils.sheet_add_aoa(
+        worksheet,
+        legendItems.map(({ label, styleKey }) => [label, formatStatusLabel(styleKey) || label]),
+        { origin: { r: legendStartRow, c: 0 } }
+      );
+
+      const legendHeaderStyle = mergeStyles(baseStyle, {
+        fill: { patternType: 'solid', fgColor: { rgb: 'FF3478F6' } },
+        font: { color: { rgb: 'FFFFFFFF' }, bold: true }
+      });
+
+      ['A', 'B'].forEach((col) => {
+        const address = `${col}${legendStartRow}`;
+        if (worksheet[address]) {
+          worksheet[address].s = legendHeaderStyle;
+        }
+      });
+
+      legendItems.forEach(({ styleKey }, index) => {
+        const row = legendStartRow + index + 1;
+        const statusCellAddress = `A${row}`;
+        const descCellAddress = `B${row}`;
+
+        const style =
+          statusStyles[styleKey] ||
+          columnTypeStyles[styleKey] ||
+          mergeStyles(baseStyle, {
+            fill: { patternType: 'solid', fgColor: { rgb: 'FFF5F5F5' } }
+          });
+
+        if (worksheet[statusCellAddress]) {
+          worksheet[statusCellAddress].s = style;
+        }
+        if (worksheet[descCellAddress]) {
+          worksheet[descCellAddress].s = mergeStyles(baseStyle, {});
+        }
+      });
+
+      XLSX.writeFile(workbook, buildFileBaseName('xlsx'), { cellStyles: true });
+    }
+
+    function setButtonPending(button, pending) {
+      if (!button) return;
+      button.disabled = pending;
+      button.dataset.loading = pending ? 'true' : 'false';
+    }
+
+    function attachLoadingState(button, label) {
+      if (!button) return;
+      const original = button.innerHTML;
+      button.addEventListener('download-start', () => {
+        button.innerHTML = `<span>⏳</span> ${label}中…`;
+      });
+      button.addEventListener('download-end', () => {
+        button.innerHTML = original;
+      });
+    }
+
+    attachLoadingState(downloadPdfButton, '导出');
+    attachLoadingState(downloadExcelButton, '导出');
+
+    async function handlePdfDownload() {
+      if (!downloadPdfButton) return;
+      downloadPdfButton.dispatchEvent(new Event('download-start'));
+      setButtonPending(downloadPdfButton, true);
+      try {
+        await exportPdf();
+      } finally {
+        downloadPdfButton.dispatchEvent(new Event('download-end'));
+        setButtonPending(downloadPdfButton, false);
+      }
+    }
+
+    async function handleExcelDownload() {
+      if (!downloadExcelButton) return;
+      downloadExcelButton.dispatchEvent(new Event('download-start'));
+      setButtonPending(downloadExcelButton, true);
+      try {
+        await exportExcel();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        downloadExcelButton.dispatchEvent(new Event('download-end'));
+        setButtonPending(downloadExcelButton, false);
+      }
+    }
+
+    extensionInput.addEventListener('input', (event) => {
+      rangeDisplay.textContent = event.target.value;
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      buildSchedule();
+    });
+
+    downloadPdfButton?.addEventListener('click', handlePdfDownload);
+    downloadExcelButton?.addEventListener('click', handleExcelDownload);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initOptions();
+      if (tableTitleInput) {
+        tableTitleDisplay.textContent = `导出预览：${getScheduleTitle()}`;
+        tableTitleInput.addEventListener('input', () => {
+          tableTitleDisplay.textContent = `导出预览：${getScheduleTitle()}`;
+        });
+      }
+      buildSchedule();
+    });
+  </script>
+</body>
+</html>
