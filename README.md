@@ -21,4 +21,6 @@ python3 main.py --port 8700           # 可修改端口
 
 本项目为纯前端实现，所有排班信息仅在浏览器本地生成，不会上传至任何服务器，请放心使用。
 
+在线体验地址：https://dutyboard.nops.icu
+
 ![界面效果示例](docs/screenshot.png)
