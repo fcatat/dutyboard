@@ -5,400 +5,85 @@
   <title>2026 年中国企业值班安排表在线生成器</title>
   <link rel="icon" type="image/x-icon" href="favourite.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    :root {
-      color-scheme: light dark;
-      font-family: "SF Pro SC", "PingFang SC", "Microsoft Yahei", sans-serif;
-      --accent: #3478f6;
-      --holiday: rgba(255, 107, 129, 0.18);
-      --weekend: rgba(116, 191, 255, 0.2);
-      --makeup: rgba(255, 185, 46, 0.22);
-      --rest-bg: rgba(56, 193, 114, 0.22);
-      --duty-bg: rgba(52, 120, 246, 0.2);
-      --oncall-bg: rgba(255, 143, 63, 0.24);
-    }
-
-    body {
-      margin: 0;
-      padding: 1.5rem 1.25rem 3rem;
-      background: #fafafa;
-      color: #222;
-    }
-
-    h1 {
-      margin: 0 0 1rem;
-      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
-    }
-
-    p.lead {
-      margin: 0 0 2rem;
-      color: #555;
-    }
-
-    .panel {
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 16px 28px -24px rgba(41, 49, 77, 0.38);
-      padding: 1.25rem 1.35rem 1.6rem;
-      max-width: 1024px;
-      margin: 0 auto 1.75rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 0.75rem 1.2rem;
-      margin-bottom: 0.65rem;
-    }
-
-    form#control-form {
-      margin-bottom: 0.4rem;
-    }
-
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      font-weight: 600;
-    }
-
-    select,
-    input[type="number"],
-    input[type="range"] {
-      border-radius: 10px;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      padding: 0.65rem 0.75rem;
-      font-size: 1rem;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    input[type="range"] {
-      padding: 0;
-    }
-
-    select:focus,
-    input[type="number"]:focus,
-    input[type="range"]:focus {
-      border-color: var(--accent);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.2);
-    }
-
-    .range-display {
-      font-size: 0.95rem;
-      color: #666;
-    }
-
-    button {
-      background: var(--accent);
-      border: none;
-      color: #fff;
-      padding: 0.75rem 1.8rem;
-      border-radius: 999px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      align-self: flex-end;
-      justify-self: flex-start;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    button[data-variant="ghost"] {
-      background: rgba(52, 120, 246, 0.1);
-      color: #1f4aa8;
-    }
-
-    button[data-variant="danger"] {
-      background: #e94f4f;
-      color: #fff;
-    }
-
-    button[data-variant="danger"]:hover {
-      box-shadow: 0 10px 20px -12px rgba(233, 79, 79, 0.7);
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px -12px rgba(36, 98, 195, 0.8);
-    }
-
-    button span {
-      font-size: 1.15rem;
-    }
-
-    .legend {
-      display: flex;
-      gap: 0.85rem;
-      flex-wrap: wrap;
-      font-size: 0.9rem;
-      color: #444;
-      margin-top: 0.35rem;
-    }
-
-    .legend span {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .swatch {
-      width: 12px;
-      height: 12px;
-      border-radius: 4px;
-      display: inline-block;
-    }
-
-    .schedule-wrapper {
-      overflow-x: auto;
-      border-radius: 14px;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      background: #fff;
-    }
-
-    .table-title-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
-    #table-title-input {
-      flex: 1;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #1f3366;
-      padding: 0.45rem 0.75rem;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      outline: none;
-      background: rgba(52, 120, 246, 0.08);
-      min-height: 2.1rem;
-    }
-
-    #table-title-input:focus {
-      border-color: rgba(52, 120, 246, 0.4);
-      background: rgba(52, 120, 246, 0.12);
-      box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.18);
-    }
-
-    #table-title-input[data-placeholder]:empty::before {
-      content: attr(data-placeholder);
-      color: #8c8c8c;
-      font-weight: 400;
-    }
-
-    #table-title-display {
-      display: none;
-    }
-
-    table {
-      border-collapse: separate;
-      border-spacing: 0;
-      width: 100%;
-      min-width: 680px;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      background: #f6f7fb;
-      z-index: 1;
-    }
-
-    th, td {
-      padding: 0.8rem 0.9rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-      text-align: center;
-    }
-
-    tbody tr:nth-child(odd) td:first-child {
-      background: rgba(52, 120, 246, 0.08);
-    }
-
-    td {
-      cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
-    }
-
-    td[data-role="name"] {
-      cursor: default;
-      font-weight: 600;
-      color: #222;
-      background: rgba(52, 120, 246, 0.12);
-      position: sticky;
-      left: 0;
-      z-index: 1;
-    }
-
-    td[data-role="name"]::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: inherit;
-      z-index: -1;
-    }
-
-    td.holiday {
-      background: var(--holiday);
-    }
-
-    td.weekend {
-      background: var(--weekend);
-    }
-
-    td.makeup-day {
-      background: var(--makeup);
-    }
-
-    td.status-rest {
-      background: var(--rest-bg) !important;
-      color: #207449;
-      font-weight: 600;
-    }
-
-    td.status-duty {
-      background: var(--duty-bg) !important;
-      color: #0c2e78;
-      font-weight: 600;
-    }
-
-    td.status-oncall {
-      background: var(--oncall-bg) !important;
-      color: #8c3a00;
-      font-weight: 600;
-    }
-
-    td:active {
-      transform: scale(0.97);
-    }
-
-    caption {
-      caption-side: bottom;
-      padding: 1rem;
-      color: #555;
-      text-align: right;
-      font-size: 0.9rem;
-    }
-
-    .muted {
-      color: #6c6c6c;
-      font-size: 0.9rem;
-    }
-
-    .action-row {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-top: 1rem;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .action-row button {
-      flex: 0 0 auto;
-    }
-
-    @media (max-width: 720px) {
-      body {
-        padding-inline: 1rem;
-      }
-
-      .panel {
-        padding: 1.1rem 1.2rem 1.5rem;
-      }
-
-      button {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .schedule-wrapper {
-        margin-inline: -1rem;
-      }
-
-      .action-row button {
-        width: 100%;
-      }
-
-      .table-title-bar {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      #table-title-display {
-        max-width: 100%;
-        text-align: left;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="panel">
-    <h1>2026 员工假期值班排班表</h1>
-    <p class="lead">
-      根据国务院办公厅公布的
-      <a href="https://www.gov.cn/zhengce/zhengceku/202511/content_7047091.htm" target="_blank" rel="noopener noreferrer">
-        2026 年部分节假日安排
-      </a>，快速生成覆盖假期及前后延伸日期的值班表。
-      点击单元格可在“休”“班”“值”“空”之间循环。本项目为纯前端项目，不会在服务器端留存任何数据，请放心使用。
-    </p>
-
-    <form id="control-form">
-      <div class="form-grid">
-        <label>
-          选择节假日
-          <select id="holiday-select" required></select>
-        </label>
-        <label>
-          员工数量（行数）
-          <input id="employee-count" type="number" min="1" max="60" value="3" />
-        </label>
-        <label>
-          假期前后延伸天数
-          <input id="extension-days" type="range" min="0" max="14" value="3" />
-          <span class="range-display">假期前后各延伸 <strong>3</strong> 天</span>
-        </label>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>2026 排班助手</h1>
+        <p class="lead">
+          根据国务院办公厅公布的 
+          <a href="https://www.gov.cn/zhengce/zhengceku/202511/content_7047091.htm" target="_blank" rel="noopener noreferrer">
+            2026 年部分节假日安排
+          </a>，快速生成覆盖假期及前后延伸日期的值班表。
+          点击单元格可在“休”“班”“值”“空”之间循环。本项目为纯前端项目，不会在服务器端留存任何数据，请放心使用。
+        </p>
       </div>
-      <button type="submit" data-variant="danger">
-        <span>🔄</span> 重新生成排班表
-      </button>
-    </form>
 
-    <div class="legend" aria-hidden="true">
-      <span><span class="swatch" style="background: var(--holiday)"></span> 官方放假日</span>
-      <span><span class="swatch" style="background: var(--weekend)"></span> 周末自动标记</span>
-      <span><span class="swatch" style="background: var(--makeup)"></span> 调休需上班</span>
-      <span><span class="swatch" style="background: var(--rest-bg)"></span> 状态：休</span>
-      <span><span class="swatch" style="background: var(--duty-bg)"></span> 状态：班</span>
-      <span><span class="swatch" style="background: var(--oncall-bg)"></span> 状态：值</span>
-    </div>
+      <form id="control-form">
+        <div class="form-group">
+          <label>
+            选择节假日
+            <select id="holiday-select" required></select>
+          </label>
+        </div>
+        
+        <div class="form-group">
+          <label>
+            员工数量
+            <input id="employee-count" type="number" min="1" max="60" value="3" />
+          </label>
+        </div>
 
-  </div>
+        <div class="form-group">
+          <label>
+            <span>延伸天数 <span class="range-display"><strong>3</strong> 天</span></span>
+            <input id="extension-days" type="range" min="0" max="14" value="3" />
+          </label>
+        </div>
 
-  <div class="panel schedule-panel">
-    <div class="schedule-wrapper">
-      <div class="table-title-bar">
-        <span contenteditable="true" id="table-title-input" data-placeholder="可在此录入自定义标题">xxx公司假期值班安排</span>
-        <span id="table-title-display"></span>
+        <button type="submit" data-variant="primary" class="btn-block">
+          <span>🔄</span> 生成排班表
+        </button>
+      </form>
+
+      <div class="legend" aria-hidden="true">
+        <div class="legend-title">图例说明</div>
+        <div class="legend-grid">
+          <span><span class="swatch" style="background: var(--color-holiday)"></span> 放假</span>
+          <span><span class="swatch" style="background: var(--color-weekend)"></span> 周末</span>
+          <span><span class="swatch" style="background: var(--color-makeup)"></span> 调休</span>
+          <span><span class="swatch" style="background: var(--status-rest-bg)"></span> 休</span>
+          <span><span class="swatch" style="background: var(--status-duty-bg)"></span> 班</span>
+          <span><span class="swatch" style="background: var(--status-oncall-bg)"></span> 值</span>
+        </div>
       </div>
-      <table id="schedule-table">
-        <thead></thead>
-        <tbody></tbody>
-        <caption id="schedule-meta"></caption>
-      </table>
-    </div>
-    <div class="action-row">
-      <button type="button" id="download-pdf" data-variant="ghost">
-        <span>📄</span> 下载 PDF
-      </button>
-      <button type="button" id="download-excel" data-variant="ghost">
-        <span>📊</span> 下载 Excel
-      </button>
-    </div>
+    </aside>
+
+    <main class="content-area">
+      <div class="panel schedule-panel">
+        <div class="table-title-bar">
+          <span contenteditable="true" id="table-title-input" data-placeholder="可在此录入自定义标题">xxx公司假期值班安排</span>
+          <span id="table-title-display"></span>
+        </div>
+        <div class="schedule-wrapper">
+          <table id="schedule-table">
+            <thead></thead>
+            <tbody></tbody>
+            <caption id="schedule-meta"></caption>
+          </table>
+        </div>
+        <div class="action-row">
+          <button type="button" id="download-pdf" data-variant="ghost">
+            <span>📄</span> 导出 PDF
+          </button>
+          <button type="button" id="download-excel" data-variant="ghost">
+            <span>📊</span> 导出 Excel
+          </button>
+        </div>
+      </div>
+    </main>
   </div>
 
   <script src="vendor/jspdf.umd.min.js"></script>
@@ -719,34 +404,34 @@
 
     const STATUS_STYLE_MAP = {
       休: {
-        fillColor: [255, 205, 210],
-        textColor: [183, 28, 28],
+        fillColor: [220, 252, 231], // Green-100
+        textColor: [20, 83, 45],    // Green-900
         display: '休假'
       },
       班: {
-        fillColor: [200, 230, 201],
-        textColor: [27, 94, 32],
+        fillColor: [219, 234, 254], // Blue-100
+        textColor: [30, 58, 138],   // Blue-900
         display: '上班'
       },
       值: {
-        fillColor: [255, 224, 178],
-        textColor: [239, 108, 0],
+        fillColor: [255, 237, 213], // Orange-100
+        textColor: [124, 45, 18],   // Orange-900
         display: '值班'
       }
     };
 
     const COLUMN_TYPE_STYLE_MAP = {
       holiday: {
-        fillColor: [255, 236, 240],
-        textColor: [150, 26, 26]
+        fillColor: [255, 228, 230], // Rose-100
+        textColor: [159, 18, 57]    // Rose-900
       },
       weekend: {
-        fillColor: [236, 243, 255],
-        textColor: [40, 71, 140]
+        fillColor: [241, 245, 249], // Slate-100 (changed from blue to be more subtle for weekend)
+        textColor: [71, 85, 105]    // Slate-600
       },
       makeup: {
-        fillColor: [255, 243, 222],
-        textColor: [139, 94, 0]
+        fillColor: [254, 243, 199], // Amber-100
+        textColor: [146, 64, 14]    // Amber-900
       }
     };
 
