@@ -1,0 +1,27 @@
+{
+  "name": "dutyboard",
+  "version": "1.0.0",
+  "description": "2026 年节假日员工排班表在线生成器",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "wrangler pages dev web",
+    "deploy": "wrangler pages deploy web"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fcatat/dutyboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fcatat/dutyboard/issues"
+  },
+  "homepage": "https://github.com/fcatat/dutyboard#readme",
+  "devDependencies": {
+    "wrangler": "^4.51.0"
+  }
+}
