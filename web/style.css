@@ -1,39 +1,39 @@
 :root {
-  /* Dark Mode Palette - Zinc & Indigo */
-  --primary: #818cf8;         /* Indigo-400 */
-  --primary-hover: #6366f1;   /* Indigo-500 */
-  --primary-light: rgba(129, 140, 248, 0.15);
+  /* Modern Light Palette - Indigo & Zinc */
+  --primary: #4f46e5;         /* Indigo-600 */
+  --primary-hover: #4338ca;   /* Indigo-700 */
+  --primary-light: rgba(79, 70, 229, 0.1);
   
-  --text-main: #f4f4f5;       /* Zinc-100 */
-  --text-secondary: #a1a1aa;  /* Zinc-400 */
+  --text-main: #18181b;       /* Zinc-900 */
+  --text-secondary: #71717a;  /* Zinc-500 */
   
-  --bg-body: #09090b;         /* Zinc-950 */
-  --bg-surface: #18181b;      /* Zinc-900 */
-  --bg-highlight: #27272a;    /* Zinc-800 */
-  --border-color: #27272a;    /* Zinc-800 */
+  --bg-body: #f4f4f5;         /* Zinc-100 */
+  --bg-surface: #ffffff;
+  --bg-highlight: #f4f4f5;    /* Zinc-100 */
+  --border-color: #e4e4e7;    /* Zinc-200 */
   
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-full: 9999px;
 
-  /* Status Colors - Dark Mode Optimized */
-  --color-holiday: rgba(190, 18, 60, 0.3);      /* Rose-700 alpha */
-  --color-holiday-text: #fda4af;                /* Rose-300 */
+  /* Status Colors - Modern Light Mode */
+  --color-holiday: #ffe4e6;        /* Rose-100 */
+  --color-holiday-text: #be123c;   /* Rose-700 */
   
-  --color-weekend: rgba(39, 39, 42, 0.5);       /* Zinc-800 alpha */
-  --color-weekend-text: #9ca3af;                /* Gray-400 */
+  --color-weekend: #f3f4f6;        /* Gray-100 */
+  --color-weekend-text: #4b5563;   /* Gray-600 */
   
-  --color-makeup: rgba(146, 64, 14, 0.3);       /* Amber-800 alpha */
-  --color-makeup-text: #fcd34d;                 /* Amber-300 */
+  --color-makeup: #fef3c7;         /* Amber-100 */
+  --color-makeup-text: #b45309;    /* Amber-700 */
   
-  --status-rest-bg: rgba(21, 128, 61, 0.3);     /* Emerald-700 alpha */
-  --status-rest-text: #86efac;                  /* Emerald-300 */
+  --status-rest-bg: #dcfce7;       /* Emerald-100 */
+  --status-rest-text: #15803d;     /* Emerald-700 */
   
-  --status-duty-bg: rgba(29, 78, 216, 0.3);     /* Blue-700 alpha */
-  --status-duty-text: #93c5fd;                  /* Blue-300 */
+  --status-duty-bg: #dbeafe;       /* Blue-100 */
+  --status-duty-text: #1d4ed8;     /* Blue-700 */
   
-  --status-oncall-bg: rgba(194, 65, 12, 0.3);   /* Orange-700 alpha */
-  --status-oncall-text: #fdba74;                /* Orange-300 */
+  --status-oncall-bg: #ffedd5;     /* Orange-100 */
+  --status-oncall-text: #c2410c;   /* Orange-700 */
 }
 
 *, *::before, *::after {
@@ -134,9 +134,9 @@ select:focus, input:focus {
   box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* Custom Select Arrow for Dark Mode */
+/* Custom Select Arrow for Light Mode */
 select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a1a1aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 0.5rem center;
   background-repeat: no-repeat;
   background-size: 1.5em 1.5em;
